@@ -102,9 +102,9 @@ const aksManagedCluster = new aks.ManagedCluster(aksName, {
     },
     aadProfile: {
         adminGroupObjectIDs: [adminGrpAks.objectId],
-        managed: false,
+        managed: true, //To user k8s rbac
         tenantID: tenantId,
-        enableAzureRBAC: true,
+        enableAzureRBAC: false, //To use azure rbac on aks
     },
     apiServerAccessProfile: {
         enablePrivateCluster: true, // Will create a private endpoint (NIC private IP) and associate it the the aks
