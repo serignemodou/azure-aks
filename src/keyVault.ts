@@ -6,6 +6,7 @@ import * as network from "@pulumi/azure-native/network"
 import {env, resourceGroup, tags, tenantId, projectName} from './common'
 import {snetData} from "./spokeNetwork"
 import * as pulumi from '@pulumi/pulumi';
+import {pgDbName, pgFqdn, pgPassword, pgUsername} from "./postgres-flexible"
 
 const randomSuffix = new random.RandomString(`kv-rdn-name`, {
     length: 3,
@@ -53,3 +54,22 @@ export const kVault = {
     name: vault.name,
     resourceGroup: resourceGroup.name
 }
+
+/* automatically add postgres and registry credential to key vault */ 
+const postgresqlSecrets: Record<string, pulumi.Output<string>> = {
+    pg_dbname: pulumi.output(pgDbName),
+    pg_fqdn: pulumi.output(pgFqdn),
+    pg_password: pulumi.output(pgPassword),
+    pg_username: pulumi.output(pgUsername)
+}
+
+Object.entries(postgresqlSecrets).map(([name, value]) => {
+    return new keyvault.Secret(`secrets-${env}`, {
+        vaultName: kVault.name,
+        resourceGroupName: resourceGroup.name,
+        secretName: name.toUpperCase(),
+        properties: {
+            value: value,
+        }
+    })
+})

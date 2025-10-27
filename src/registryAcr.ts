@@ -93,6 +93,6 @@ const token = acr.getTokenOutput({
 
 
  // Information Used in the CI pipeline to push image
- export  const acrUsername = credentials.username
+ export const acrUsername = credentials.username
  export const acrPassword  = credentials.passwords?.apply(pwd => pwd?.values)
  export const registreFqdn = registry.loginServer

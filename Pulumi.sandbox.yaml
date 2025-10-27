@@ -3,10 +3,6 @@ config:
   azure-native:location: FranceCentral
   azure-native:subscription: "adb13171-70f4-4398-a85b-765112b87ab4"
   azure-natve:tenantId: "azure-tenant-id"
-  
-
-  add:config:
-
 
   networkSpoke:config:
     vnetCIDR: ["172.144.0.0/24"]
@@ -64,3 +60,11 @@ config:
   acr:config:
     sku: 'Standard'
     zoneRedundancy: 'Disabled' # Enabled for 'prod'
+
+  postgresqlflexible:config:
+    adminUsername: 'AdminUser'
+    dbName: 'alloDB'
+    highAvailability: false 
+    skuName: 'B_Standard_B2s' #PROD/BUILD 'GP_Standard_D2ds_v4'
+    storageMb: 32768
+    backupRetentionDays: 7 #7 min, 35 max

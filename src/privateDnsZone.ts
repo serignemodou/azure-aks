@@ -28,3 +28,28 @@ new privatedns.VirtualNetworkLink('zone-dns-hub-vnet-link', {
     },
     registrationEnabled: false
 })
+
+export const prostgresZoneDns = new privatedns.PrivateZone('postgresql-prv-zone-dns', {
+    resourceGroupName: resourceGroup.name,
+    privateZoneName: `beapp.${env}.prv.postgres.database.azure.com`,
+    tags,
+})
+
+new privatedns.VirtualNetworkLink('zone-dns-spoke-vnet-link', {
+    resourceGroupName: resourceGroup.name,
+    virtualNetworkLinkName: `link-to-vnet-spoke`,
+    privateZoneName: prostgresZoneDns.name,
+    virtualNetwork: {
+        id: vnet.id
+    }
+})
+
+new privatedns.VirtualNetworkLink('zone-dns-hub-vnet-link', {
+    resourceGroupName: resourceGroup.name,
+    virtualNetworkLinkName: `link-to-vnet-hub`,
+    privateZoneName: prostgresZoneDns.name,
+    virtualNetwork: {
+        id: vnetHub.id
+    },
+    registrationEnabled: false
+})
