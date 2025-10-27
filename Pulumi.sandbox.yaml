@@ -1,0 +1,66 @@
+config:
+  az:servicePrincipalName: sp-az-it-sandbox
+  azure-native:location: FranceCentral
+  azure-native:subscription: "adb13171-70f4-4398-a85b-765112b87ab4"
+  azure-natve:tenantId: "azure-tenant-id"
+  
+
+  add:config:
+
+
+  networkSpoke:config:
+    vnetCIDR: ["172.144.0.0/24"]
+    snetAksCIDR: "172.144.0.0/26"
+    snetPostgreCIDR: "172.144.0.64/27"
+    snetDataCIDR: '172.144.0.95/27'
+    snetRegistryCIDR: '172.144.0.126/28'
+
+  networkHub:config:
+    vnetCIDR: ['172.24.0.0/24']
+    snetFirewall: '172.24.0.0/27'
+
+  aks:managedCluster:
+    kubernetesVersion: '1.33'
+    podCIDR: "172.145.0.0/24"
+    serviceCIDR: "172.146.0.0/24"
+    dnsServiceIP: '172.146.0.10'
+    skuName: 'Base'
+    skuTier: 'Free' #Free or Standard or Premium
+
+  aks:systemNodePool:
+    count: 2
+    maxCount: 2
+    minCount: 1
+    maxPods: 110
+    mode: 'System'
+    enableAutoScaling: false
+    osDiskSizeGB: 50
+    osDiskType: 'Managed'
+    osSKU: 'Ubuntu'
+    osType: 'Linux'
+    vmSize: 'Standard_D4ds_v5'
+    orchestratorVersion: '1.33' 
+    type: 'VirtualMachineScaleSets'
+    workloadRuntime: 'OCIContainer'
+    availabilityZones: ['1', '2', '3']
+
+  aks:appNodePool:
+    count: 2
+    maxCount: 2
+    minCount: 1
+    maxPods: 110,
+    mode: 'User'
+    enableAutoScaling: false
+    osDiskSizeGB: 50
+    osDiskType: 'Managed'
+    osSKU: 'Ubuntu'
+    osType: 'Linux'
+    vmSize: 'Standard_D4ds_v5'
+    orchestratorVersion: ''
+    type: 'VirtualMachineScaleSets'
+    workloadRuntime: 'OCIContainer'
+    availabilityZones: ['1', '2', '3']
+
+  acr:config:
+    sku: 'Standard'
+    zoneRedundancy: 'Disabled' # Enabled for 'prod'

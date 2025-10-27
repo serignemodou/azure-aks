@@ -1,0 +1,7 @@
+name: aks
+runtime: nodejs
+description: AlloDoctor application 
+
+config:
+  project:url:
+      value: https://github.com:serignemodou/azure-webapp.git
