@@ -1,0 +1,9 @@
+name: Pulumi Up
+on:
+    push:
+        branches: [sandbox, build, prod]
+
+jobs:
+    up:
+        uses: azure-deploy/.github/workflows/pulumi-up.yml@latest
+        secrets: inherit

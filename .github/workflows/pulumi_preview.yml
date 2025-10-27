@@ -1,0 +1,9 @@
+name: Pulumi Preview
+on:
+    push:
+        branches: [sandbox, build, prod]
+
+jobs:
+    preview:
+        uses: azure-deploy/.github/workflows/pulumi-preview.yml@latest
+        secrets: inherit

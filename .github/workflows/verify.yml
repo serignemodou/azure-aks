@@ -1,0 +1,12 @@
+name: Verify
+on:
+    push:
+        branches: [sandbox, build, prod]
+jobs:
+    verify:
+        runs-on: [self-hosted] #ubuntu-latest #[pulumi, azure]
+        name: verify
+        steps:
+            - id: verify
+              name: Verify for azure action
+              uses: azure-actions/verify@stable

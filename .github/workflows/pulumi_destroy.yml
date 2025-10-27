@@ -1,0 +1,8 @@
+name: Pulumi Destroy
+on:
+    workflow_dispatch: 
+jobs:
+    destroy:
+        if: github.ref_name == 'sandbox'
+        uses: azure-deploy/.github/workflows/pulumi-preview.yml@latest
+        secrets: inherit
