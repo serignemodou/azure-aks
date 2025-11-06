@@ -535,10 +535,10 @@
     moment "2.29.4"
     node-fetch "^2.3.0"
 
-"@pulumi/azuread@^6.6.0":
-  version "6.6.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/azuread/-/azuread-6.6.0.tgz#4470b1b3a91a2dc1f38243d4f0408896263d5b40"
-  integrity sha512-irLwBDKP/Vb/CvlJVl05iXg5EBpMM5sS3K/zTviYM4JkaMB5aulS4q3r7ZGtyx6F5HtKHO5jhdztXOtTiM/NJw==
+"@pulumi/azuread@^6.7.0":
+  version "6.7.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/azuread/-/azuread-6.7.0.tgz#7dffda1cdb439a74e86fbb9af68f183467c6bd1e"
+  integrity sha512-Sof8+l+a0PlZA8PjCrw3rvIB1bXKgoT8wGvZs2ZZs3DSHxOIO4ynq02m9Ri305sSno4G5DVyZFJYPFLAIypDjg==
   dependencies:
     "@pulumi/pulumi" "^3.142.0"
 
