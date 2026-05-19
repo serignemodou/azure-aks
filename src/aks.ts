@@ -6,7 +6,7 @@ import * as pulumi from '@pulumi/pulumi';
 
 import {env, projectName, resourceGroup, tags, tenantId} from "./common"
 import {snetAks, snetPostgres} from "./spokeNetwork"
-import {prvZoneDns} from "./privateDnsZone"
+import {aksPrvZoneDns} from "./privateDnsZone"
 import {registry} from "./registryAcr"
 import {vault} from "./keyVault"
 
@@ -65,6 +65,14 @@ const adminGrpAks = new azuread.Group(adminAksGroupName, {
     securityEnabled: true,
 })
 
+const aksUaiName = `aks-uai-${projectName}-${env}`
+const aksUai = new managedIdentity.UserAssignedIdentity(aksUaiName, {
+    resourceGroupName: resourceGroup.name,
+    location: resourceGroup.location,
+    resourceName: aksUaiName,
+    tags
+})
+
 const kubeletUaiName = `kubelet-uia-${projectName}-${env}`
 const kubeletUai = new managedIdentity.UserAssignedIdentity(kubeletUaiName, {
     resourceGroupName: resourceGroup.name,
@@ -91,7 +99,8 @@ const aksManagedCluster = new aks.ManagedCluster(aksName, {
     dnsPrefix: `aks-dns-${env}`,
     publicNetworkAccess: aks.PublicNetworkAccess.Disabled,
     identity: {
-        type: aks.ResourceIdentityType.SystemAssigned  // Managed Identity used by the Control plan
+        type: aks.ResourceIdentityType.UserAssigned,  // Managed Identity used by the Control plan
+        userAssignedIdentities: [aksUai.id]
     },
     identityProfile: { // Managed Identity used by kubelet
         userManagedIdentityKubelet: {
@@ -109,7 +118,7 @@ const aksManagedCluster = new aks.ManagedCluster(aksName, {
     apiServerAccessProfile: {
         enablePrivateCluster: true, // Will create a private endpoint (NIC private IP) and associate it the the aks
         enablePrivateClusterPublicFQDN: true, // fqdn api-server will  be <cluster-name>.<privateDNSZone-name>, the nslookup of this domain must return thi private ip of the service endpoint
-        privateDNSZone: prvZoneDns.id // Option 'system' allow only resource in the same vnet (node, pod, other resources) to resolve aks dns api-server
+        privateDNSZone: aksPrvZoneDns.id // Option 'system' allow only resource in the same vnet (node, pod, other resources) to resolve aks dns api-server
     },
     networkProfile: {
         networkDataplane: 'Cilium',
@@ -243,6 +252,29 @@ new aks.AgentPool(appAgentPoolName, {
     workloadRuntime: 'OCIContainer',
 })
 
+/*
+Role pour que le cluster puisse utiliser la zone DNS privée dans le HUB Vnet aksPrvZoneDns
+Assign Private DNS Zone Contributor to AKS
+*/
+const prvZoneDNSRoleDefinition = new authorization.RoleDefinition(`prv-dns-zone-contributor-${env}`, {
+    roleName: "Private DNS Zone Contributor",
+    scope: aksPrvZoneDns.id
+})
+new authorization.RoleAssignment(`prv-zone-dns-role-contributor-${env}`, {
+    roleAssignmentName: "private-dns-zone-contributor",
+    roleDefinitionId: prvZoneDNSRoleDefinition.id,
+    principalId: aksManagedCluster.identity.apply(identity => identity?.principalId)
+})
+
+/*
+Le control plan aks aura besoin de créer des résources (loadbalancer par exemple) réseau sur le subnet ou se trouve le control plan
+Donc, il a besoin d'un role Network Contributor sur le vnet qui contient le subnet
+Assign Private DNS Zone Contributor to AKS
+*/
+
+/*
+Assign ACR Pool role to node pool AKS
+*/
 const acrPullRoleDefinition = new authorization.RoleDefinition(`acr-pull-role-definition$-${env}`, {
     roleName: 'AcrPull',
     scope: registry.id
@@ -255,6 +287,9 @@ new authorization.RoleAssignment(`acr-pull-role-assignement`, {
     scope: registry.id
 })
 
+/*
+Assign Key Vault Secrets User to node pool AKS
+*/
 const vaultRoleDefinition = new authorization.RoleDefinition(`vault-role-definition-${env}`, {
     roleName: 'Key Vault Secrets User',
     scope: vault.id,

@@ -4,7 +4,13 @@ import {env, resourceGroup, projectName, tags } from "./common"
 import {vnetHub} from "./hubNetwork"
 import {vnet} from "./spokeNetwork"
 
-export const prvZoneDns = new privatedns.PrivateZone('aks-prv-zone-dns', {
+/*
+En mode privé, l'API server a besoin de créer un enregistrement DNS dans la zone privée. Par défaut AKS crée une zone DNS 
+privée dans la souscription dans laquelle il a été déployé (cela peut créer des soucis de résolution DNS).
+Donc pour que la résolution se passe correctement, il est requis d'utiliser la zone DNS privée centralisée dans le hub.
+*/
+
+export const aksPrvZoneDns = new privatedns.PrivateZone('aks-prv-zone-dns', {
     resourceGroupName: resourceGroup.name,
     privateZoneName: `private-${resourceGroup.location}.azmk8s.io`,
     tags,
@@ -13,7 +19,7 @@ export const prvZoneDns = new privatedns.PrivateZone('aks-prv-zone-dns', {
 new privatedns.VirtualNetworkLink('zone-dns-spoke-vnet-link', {
     resourceGroupName: resourceGroup.name,
     virtualNetworkLinkName: `link-to-vnet-spoke`,
-    privateZoneName: prvZoneDns.name,
+    privateZoneName: aksPrvZoneDns.name,
     virtualNetwork: {
         id: vnet.id
     }
@@ -22,7 +28,7 @@ new privatedns.VirtualNetworkLink('zone-dns-spoke-vnet-link', {
 new privatedns.VirtualNetworkLink('zone-dns-hub-vnet-link', {
     resourceGroupName: resourceGroup.name,
     virtualNetworkLinkName: `link-to-vnet-hub`,
-    privateZoneName: prvZoneDns.name,
+    privateZoneName: aksPrvZoneDns.name,
     virtualNetwork: {
         id: vnetHub.id
     },
