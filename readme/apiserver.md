@@ -4,7 +4,7 @@ L'API server est le front end du contol plane du cluster. Toutes les communicati
 Les échanges avec l'API server se réalisent au travers d'API Rest grace auxquelles il est possible de poster des commandes ou des fichiers YAML.
 Au contraire, des cluster et node-pool qui sont déployée dans nos souscription, l'API server est, quand à lui, hebergé dans une souscription propre à Azure.
 
-## Intégration réseau
+## 1. Intégration réseau
 Afin de s'assurer que les échanges entre l'API server et les nodes se font exclusivement au sein d'un réseau privé, il est impératif de réaliser une vnet intégration (c'est à dire déléguer un subnet pour y intégrer le endpoint de l'API server).
 Cette intégration peut etre réalisée pour les clusters publics et privés via 2 solutions possibles:
 - Intégration dans un vnet complétement managé par Azure
@@ -24,19 +24,19 @@ Afin que le cluster puisse interagir avec ces subnets:
 - Le role Network Contributor assigné sur les 2 subnets pour cette identié
 
 2. Securisation des accès 
-<u>ACCES EN DEHORS DU CLUSTER<u/>
+__ACCES EN DEHORS DU CLUSTER__
 Si le cluster est crée en mode public, l'API server est associé à une IP publique afin qu'il puisse etre accéder depuis internet. Dans ce cas il sera necessaire de configurer une liste d'IPs autorisées à accèder à l'API server.
 
 Pour mieux sécuriser l'accès à l'API server, il est preferable de le déployé en mode privé. Dans ce cas, l'IP de l'api server sera une IP du subnet dans lequel il a été intégré. 
 
 En mode privé, l'API server a besoin de créer un enregistrement DNS privée. Par defaut le cluster AKS crée une zone dns privée dans la souscription dans laquelle il a été déployé (cela pose des soucis de résolution si d'autres ressources en dehors de cette souscription souhaite y accèder). 
-Donc pour que la résolution se passe correctement, il est requis d'utiliser la zone DNS privée centralisé private.<<location>>.azmk8s.io de la souscription hub  (IS Service Prod).
+Donc pour que la résolution se passe correctement, il est requis d'utiliser la zone DNS privée centralisé private.location.azmk8s.io de la souscription hub  (IS Service Prod).
 
 Pour que le cluster puisse utiliser cette zone dns privée, il est nécessaire d'assigner à UAI les roles suivants:
 - le role Private DNS Zone Contributor sur la zone privée DNS
 - le role Network Contributor sur le vnet qui contient le subnet utilisé pour l'intégration AKS
 
-<u>Authentification et Autorisation</u>
+__Authentification et Autorisation__
 Il est important de pas déployer le cluster avec la gestion de l'authentification et des autorisations positionnée sur l'usage des comptes locaux.
 Si on enlève cette solution, il en reste les deux suivantes:
 - Authentification Entra ID avec RBAC Kubernetes (option par défaut pour AKS Automatic)
@@ -44,16 +44,16 @@ Si on enlève cette solution, il en reste les deux suivantes:
 
 Peut importe la solution choisie, on preferera donner les droits au niveau des groupes plutot qu'à l'utilisateur unitaire pour en simplifier la gestion. 
 
-<u>RBAC Kubernetes</u>
+__RBAC Kubernetes__
 Cette option permet de gérer les actions le plus finement possible, c'est à dire sur des scope de ressources kubernetes précis.
 Mais cela necessite une gestion un plus complexe, car on doit alors gerer les roles et les roles binding au sein de AKS.
 A l'activation de cette option, il ne faut pas oublier de définir le groupe qui sera admin du cluster afin de pas se retrouver bloqué.
 
-<u>RBAC Azure</u>
+__RBAC Azure__
 Cette option s'incrit dans ce que l'on fait déjà pour les autres services azure: Assigner des roles directement à des ressources.
 Meme si on ne peut aller aussi finement dans le scope qu'avec le RBAC Kubernetes, elle permet tout de meme d'assigner des roles au niveau du cluster et des namespaces. 
 
-<u>Integration avec l'API server</u>
+__Integration avec l'API server__
 Pour intergir avec l'api server, on se sert de kubectl comme pour n'importe quel autre cluster kubernetes.
 Par contre pour AKS, c'est le plugin kubelogin pour kubectl qui sera en charge de gèrer l'authentification auprès d'Entra ID.
 
